@@ -300,6 +300,11 @@ local function foundBoss(text)
     return false
 end
 TextChatService.MessageReceived:Connect(function(message)
+                -- DEBUG: Imprime TODOS los mensajes
+    print("============ CHAT MESSAGE DEBUG ============")
+    print("Full Text:", message.Text)
+    print("Text Source:", message.TextSource and message.TextSource.Name or "Unknown")
+    print("==========================================")
     if not message or foundBoss(message.Text) == false or isBoss then return end
     inGamemode = true
     task.wait(0.5)
