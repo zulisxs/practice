@@ -1,9 +1,12 @@
+-- UI SOLO (sin lógica). Asegúrate de tener cargado Fluent antes.
+-- No llames CreateWindow más de una vez.
+local Fluent, SaveManager, InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/discoart/FluentPlus/refs/heads/main/Beta.lua"))()
+
 -- Ventana principal
 local Window = Fluent:CreateWindow({
     Title = "My Script UI",
     SubTitle = "Solo UI (sin lógica aún)",
     TitleIcon = "home",
-    Image = "rbxassetid://10723407389",
     Size = UDim2.fromOffset(700, 550),
     TabWidth = 180,
     Acrylic = true,
