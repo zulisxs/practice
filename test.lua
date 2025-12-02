@@ -1,7 +1,7 @@
 -- Fluent Plus UI Builder Generated Code
 -- https://docs.fluent-pl.us/
 
--- Load Fluent Plus library
+-- Load Fluent Pluas library
 --local Fluent = loadstring(game:HttpGet("https://raw.githubusercontent.com/discoart/FluentPlus/refs/heads/main/release.lua"))()
 
 -- Optional: Load addons (SaveManager & InterfaceManager)
