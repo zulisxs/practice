@@ -9,7 +9,7 @@ local Fluent, SaveManager, InterfaceManager = loadstring(game:HttpGet("https://r
 
 -- Create Window
 local Window = Fluent:CreateWindow({
-    Title = "My Window",
+    Title = "aaaaaa",
     SubTitle = "Fluent Plus UI",
     TitleIcon = "home",
     Size = UDim2.fromOffset(700, 550),
