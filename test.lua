@@ -19,7 +19,7 @@ local Window = Fluent:CreateWindow({
     Search = true,
     MinimizeKey = Enum.KeyCode.LeftControl,
     UserInfo = true,
-    UserInfoTitle = "game.Players.LocalPlayer.Name",
+    UserInfoTitle = game.Players.LocalPlayer.Name,
     UserInfoSubtitleColor = Color3.fromRGB(255, 215, 0),
     UserInfoTop = false
 })
