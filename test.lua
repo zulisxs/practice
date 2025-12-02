@@ -21,7 +21,7 @@ local Window = Fluent:CreateWindow({
     UserInfo = true,
     UserInfoTitle = "game.Players.LocalPlayer.Name",
     UserInfoSubtitleColor = Color3.fromRGB(255, 215, 0),
-    UserInfoTop = true
+    UserInfoTop = false
 })
 
 -- Create Tabs
