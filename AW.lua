@@ -33,6 +33,35 @@ local dontTeleport
 local gachaZone
 local attackRange = 5
 local inGamemode
+    -- Sistema de prioridades para Trial
+local isInTrial = false          -- ¿Estamos DENTRO de un trial?
+local isWaitingForTrial = false  -- ¿Esperando que empiece trial?
+local savedPowerStates = {}      -- Guardar estado de powers
+    -- Sistema de debugging para ver el estado
+task.spawn(function()
+    while true do
+        if isInTrial or isWaitingForTrial then
+            print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+            print("📊 ESTADO DEL SISTEMA - TRIAL ACTIVO")
+            print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+            print("  isInTrial:", isInTrial)
+            print("  isWaitingForTrial:", isWaitingForTrial)
+            print("  inGamemode:", inGamemode)
+            print("  waveTrial:", waveTrial, "/", targetWaveTrial)
+            print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+            print("  isFarm1:", isFarm1, "(pausado)")
+            print("  isFarm2:", isFarm2, "(pausado)")
+            print("  isTeleportFarm:", isTeleportFarm, "(pausado)")
+            print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+            print("  Powers guardados:")
+            for name, state in pairs(savedPowerStates) do
+                print("    -", name, "→", state)
+            end
+            print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        end
+        task.wait(3)
+    end
+end)
 -- FFarm
 local monsterList = {};local nameList = {};local targetList = {}
 local isAutoJoinRaid = false; 
@@ -68,7 +97,28 @@ local isAutoAttack = false
 trialGui:GetPropertyChangedSignal("Text"):Connect(function()
     waveTrial = tonumber((string.gsub(trialGui.Text, "Wave ", "")))
     warn(waveTrial)
+            
 end)
+ -- Detectar cuando termina el trial
+TextChatService.MessageReceived:Connect(function(message)
+    if not message or not message.Text then return end
+    
+    -- Detectar fin de trial
+    if string.find(message.Text, "%[GAMEMODE%]") and string.find(message.Text, "has ended!") then
+        print("✅ TRIAL TERMINADO - Detectado por chat")
+        isInTrial = false
+        isWaitingForTrial = false
+        inGamemode = false
+        
+        -- Restaurar auto powers
+        task.wait(2)  -- Esperar un poco
+        for powerName, savedState in pairs(savedPowerStates) do
+            changePower(powerName, savedState)
+            print("🔄 Restaurando power:", powerName, "→", savedState)
+        end
+        table.clear(savedPowerStates)
+    end
+end)   
 --table
 table.insert(powerList, {name = "Hero Rank", auto = false})
 table.insert(powerList, {name = "Ninja Rank", auto = false})
@@ -300,12 +350,55 @@ local function foundBoss(text)
     return false
 end
 TextChatService.MessageReceived:Connect(function(message)
-                -- DEBUG: Imprime TODOS los mensajes
     print("============ CHAT MESSAGE DEBUG ============")
     print("Full Text:", message.Text)
     print("Text Source:", message.TextSource and message.TextSource.Name or "Unknown")
     print("==========================================")
-    if not message or foundBoss(message.Text) == false or isBoss then return end
+    
+    if not message or foundBoss(message.Text) == false then return end
+    
+    -- NUEVO: Si hay trial activo, poner boss en cola
+    if isInTrial or isWaitingForTrial then
+        local boss = foundBoss(message.Text)
+        print("⏳ BOSS DETECTADO PERO TRIAL ACTIVO - Esperando...")
+        print("   Boss:", bossList[boss].name, "en", bossList[boss].map)
+        
+        -- Crear hilo que espera
+        task.spawn(function()
+            local bossIndex = boss
+            local startTime = tick()
+            local maxWaitTime = 300  -- 5 minutos máximo
+            
+            while (isInTrial or isWaitingForTrial) and (tick() - startTime) < maxWaitTime do
+                task.wait(2)
+            end
+            
+            if (tick() - startTime) >= maxWaitTime then
+                print("⚠️ TIMEOUT - Boss esperó demasiado")
+                return
+            end
+            
+            print("✅ TRIAL TERMINADO - Yendo por el boss")
+            task.wait(2)  -- Espera extra por seguridad
+            
+            if inGamemode then
+                print("⚠️ Otro gamemode activo, cancelando boss")
+                return
+            end
+            
+            inGamemode = true
+            task.wait(0.5)
+            teleportToMap(bossList[bossIndex].map)
+            killBoss(bossList[bossIndex].name, bossIndex)
+            teleportToMap(teleportBackMap)
+            inGamemode = false
+        end)
+        
+        return
+    end
+    
+    -- Si no hay trial, proceder normalmente
+    if isBoss then return end
     inGamemode = true
     task.wait(0.5)
     local boss = foundBoss(message.Text)
@@ -421,7 +514,13 @@ local function check()
 end
 task.spawn(function()
     while true do
-        if (isFarm1 == false and isFarm2 == false) or inGamemode or isTele == true then 
+        -- NUEVO: Prioridad para Trial
+        if isInTrial or isWaitingForTrial then
+            task.wait(1)
+            continue
+        end
+        
+        if (isFarm1 == false and isFarm2 == false) or inGamemode or isTele == true then
             task.wait()
             continue
         end
@@ -448,7 +547,7 @@ end
 
 local function autoTeleportFarm()
     while isTeleportFarm do
-        if inGamemode or isTele then 
+        if isInTrial or isWaitingForTrial or inGamemode or isTele then
             task.wait()
             continue 
         end
@@ -469,12 +568,38 @@ local function changePower(name, value)
     for _, power in pairs(powerList) do
         if power.name == name then 
             power.auto = value
+            
+            -- Actualizar el toggle en la GUI si existe
+            if tooglePower[name] then
+                tooglePower[name]:SetValue(value)
+            end
             return
         end
     end
 end
+
+-- NUEVA FUNCIÓN: Desactivar todos los powers temporalmente
+local function disableAllPowers()
+    print("⏸️ DESACTIVANDO AUTO POWERS PARA TRIAL")
+    table.clear(savedPowerStates)  -- Limpiar estados anteriores
+    
+    for _, power in pairs(powerList) do
+        if power.auto == true then
+            savedPowerStates[power.name] = true  -- Guardar que estaba activo
+            changePower(power.name, false)       -- Desactivar
+            print("  - Desactivado:", power.name)
+        end
+    end
+end
+    
 task.spawn(function()
     while true do
+        -- NUEVO: No ejecutar powers si hay trial
+        if isInTrial or isWaitingForTrial then
+            task.wait(1)
+            continue
+        end
+        
         for _, power in pairs(powerList) do
             if power.auto == false then 
                 task.wait()
@@ -482,7 +607,7 @@ task.spawn(function()
             end
             local name = power.name
             local ReplicatedStorage = game:GetService("ReplicatedStorage")
-            local dataRemoteEvent = ReplicatedStorage.BridgeNet2.dataRemoteEvent -- RemoteEvent 
+            local dataRemoteEvent = ReplicatedStorage.BridgeNet2.dataRemoteEvent
             dataRemoteEvent:FireServer(
                 {
                     {
@@ -544,6 +669,8 @@ local function killDungeon(monster)
 end
 
 local function checkTrial(trial) 
+        print("⚔️ INICIANDO FARM DE TRIAL")
+    isInTrial = true  -- Asegurar que estamos marcados
     while waveDungeon <= targetWaveDungeon 
      and waveRaid <= targetWaveRaid 
      and waveDef <= targetWaveDef 
@@ -561,10 +688,16 @@ local function checkTrial(trial)
             if dis >= distance or dis <= attackRange then continue end
             killDungeon(monster)
             if not inGamemode or isTele then break end
-            if waveTrial > targetWaveTrial then return end
+                        if waveTrial > targetWaveTrial then 
+                print("🎯 OBJETIVO DE WAVES ALCANZADO")
+                -- NO cambiar isInTrial aquí, el chat lo hará
+                return 
+            end
             task.wait()
         end
         if spawnPad and spawnPad.Parent and spawnPad.Parent.Name ~= "Trial Lobby" then
+            print("🚪 SALIMOS DEL TRIAL LOBBY")
+            -- NO cambiar isInTrial aquí, el chat lo hará
             return
         end
         if spawnPad and spawnPad.Parent and getDistance(hrp, spawnPad) <= 10 then
@@ -574,6 +707,14 @@ local function checkTrial(trial)
     end
 end
 local function joinDungeon()
+    -- NUEVO: Preparación para trial
+    print("🔵 INICIANDO SECUENCIA DE TRIAL")
+    isWaitingForTrial = true
+    inGamemode = true
+    
+    -- Desactivar todo
+    disableAllPowers()  -- Desactiva powers y guarda estados
+    
     local isTargetTrial = false
     currentTime = os.date("*t")
     for i, trial in pairs(trialList) do
@@ -582,20 +723,39 @@ local function joinDungeon()
             break
         end
     end
+    
+    -- Si ya estamos en el lobby del trial
     if spawnPad and spawnPad.Parent and spawnPad.Parent.Name == "Trial Lobby" then
-        inGamemode = true
+        print("✅ YA ESTAMOS EN TRIAL LOBBY")
+        isInTrial = true
+        isWaitingForTrial = false
         task.wait(1)
         checkTrial(isTargetTrial)
         task.wait(3)
+        
+        -- El chat event manejará la limpieza cuando termine
         teleportToMap(teleportBackMap)
-        inGamemode = false
         return
     end
-    if not isTargetTrial then return end
-    inGamemode = true
-    task.wait(1)
+    
+    if not isTargetTrial then 
+        print("❌ NO ES MOMENTO DE TRIAL")
+        isWaitingForTrial = false
+        inGamemode = false
+        
+        -- Restaurar powers si no hay trial
+        for powerName, savedState in pairs(savedPowerStates) do
+            changePower(powerName, savedState)
+        end
+        table.clear(savedPowerStates)
+        return 
+    end
+    
+    print("📡 INTENTANDO UNIRSE A:", isTargetTrial)
+    
+    -- Intentar unirse al trial
     local ReplicatedStorage = game:GetService("ReplicatedStorage")
-    local dataRemoteEvent = ReplicatedStorage.BridgeNet2.dataRemoteEvent -- RemoteEvent 
+    local dataRemoteEvent = ReplicatedStorage.BridgeNet2.dataRemoteEvent
     dataRemoteEvent:FireServer(
         {
             {
@@ -608,21 +768,30 @@ local function joinDungeon()
         }
     )
     task.wait(4)
+    
+    -- Verificar si entramos exitosamente
+    if spawnPad and spawnPad.Parent and spawnPad.Parent.Name == "Trial Lobby" then
+        print("✅ UNIDO AL TRIAL EXITOSAMENTE")
+        isInTrial = true
+        isWaitingForTrial = false
+    else
+        print("❌ FALLO AL UNIRSE AL TRIAL")
+        isWaitingForTrial = false
+        inGamemode = false
+        
+        -- Restaurar powers
+        for powerName, savedState in pairs(savedPowerStates) do
+            changePower(powerName, savedState)
+        end
+        table.clear(savedPowerStates)
+        return
+    end
+    
     checkTrial(isTargetTrial)
     task.wait(3)
+    
+    -- El chat event manejará la limpieza cuando detecte "has ended!"
     teleportToMap(teleportBackMap)
-    inGamemode = false
-end
-local function autoFarmDungeon()
-    while (isTrial) do
-        if inGamemode then 
-            task.wait()
-            continue
-        end
-        waveTrial = 0
-        joinDungeon()
-        task.wait(1)    
-    end
 end
 -- SStronger
 task.spawn(function()
