@@ -120,6 +120,8 @@ SectionNewSection:AddInput("MyInput", {
 SectionNewSection:AddColorpicker("MyColorpicker", {
     Title = "Color",
     Default = Color3.fromRGB(255, 0, 0),
+    Transparency = 1,
+    Icon = "palette",
     Visible = true,
     Callback = function(Color)
         -- Add your callback code here
@@ -130,6 +132,7 @@ SectionNewSection:AddColorpicker("MyColorpicker", {
 SectionNewSection:AddParagraph({
     Title = "Information",
     Content = "Enter your text here...",
+    Icon = "info",
     Visible = true
 })
 
@@ -138,9 +141,9 @@ SectionNewSection:AddParagraph({
 Window:SelectTab(1)
 
 -- Optional: Build config section with SaveManager
--- SaveManager:SetLibrary(Fluent)
--- InterfaceManager:SetLibrary(Fluent)
--- SaveManager:SetFolder("YourScriptName")
--- InterfaceManager:SetFolder("YourScriptName")
--- InterfaceManager:BuildInterfaceSection(Tabs.Settings)
--- SaveManager:BuildConfigSection(Tabs.Settings)
+SaveManager:SetLibrary(Fluent)
+InterfaceManager:SetLibrary(Fluent)
+SaveManager:SetFolder("YourScriptName")
+InterfaceManager:SetFolder("YourScriptName")
+InterfaceManager:BuildInterfaceSection(Tabs.Settings)
+SaveManager:BuildConfigSection(Tabs.Settings)
