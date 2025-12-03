@@ -76,7 +76,7 @@ ElemSection:AddButton({
     end
 })
 
-local AutofarmToggle = ElemSection:AddToggle("AutofarmToggle", {
+local AutofarmToggle = ElemSection:AddToggle("AutofarmMainToggle", {
     Title = "Autofarm", Description = "Activate Auto Farm",
     Default = false, Icon = "toggle-right",
     Callback = function(Value)
