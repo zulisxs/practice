@@ -64,12 +64,16 @@ local function startFarm()
         delaySec = tonumber(txt) or 0
     end
 
-    -- leemos nombres seleccionados
+    -- leemos nombres seleccionados (dropdown Multi)
     local selected = {}
     if Fluent and Fluent.Options.EnemiesDropdown then
-        selected = Fluent.Options.EnemiesDropdown.Value or {}
+        local raw = Fluent.Options.EnemiesDropdown.Value or {}
+        -- convierte diccionario a set plano
+        for _, name in pairs(raw) do
+            selected[name] = true
+        end
     end
-    if #selected == 0 then
+    if not next(selected) then
         Fluent:Notify({Title = "Autofarm", Content = "No hay enemigos seleccionados", Duration = 3})
         farming = false
         return
@@ -100,8 +104,7 @@ local function stopFarm()
     Fluent:Notify({Title = "Autofarm", Content = "Farm detenido", Duration = 3})
 end
 
--- conectamos el toggle de Autofarm
-task.wait(1)
+task.wait(1.5) -- un poco más de tiempo por si acaso
 if Fluent and Fluent.Options.AutofarmToggle then
     Fluent.Options.AutofarmToggle:Callback(function(v)
         if v then
@@ -110,6 +113,8 @@ if Fluent and Fluent.Options.AutofarmToggle then
             stopFarm()
         end
     end)
+else
+    warn("Toggle AutofarmToggle no encontrado")
 end
 
 return {
