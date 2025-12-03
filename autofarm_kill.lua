@@ -24,7 +24,7 @@ local function getClosestEnemy(selectedNames)
     local closest = nil
     local dist = math.huge
     for _, mdl in ipairs(enemiesFolder:GetChildren()) do
-        if mdl:IsA("Model") and table.find(selectedNames, mdl.Name) then
+        if mdl:IsA("Model") and selectedNames[mdl.Name] then
             local hum = mdl:FindFirstChildOfClass("Humanoid")
             local root = mdl:FindFirstChild("HumanoidRootPart") or mdl:FindFirstChild("Torso") or mdl:FindFirstChild("Head")
             if hum and hum.Health > 0 and root then
