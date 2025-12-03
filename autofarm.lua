@@ -1,7 +1,7 @@
 -- https://raw.githubusercontent.com/zulisxs/practice/refs/heads/main/autofarm.lua
 -- Lógica exclusiva de la pestaña "Farm"
 
-local Options = loadstring(game:HttpGet("https://raw.githubusercontent.com/zulisxs/practice/refs/heads/main/ui.lua"))() -- tabla global creada por la UI
+local Options = Fluent.Options -- tabla global creada por la UI
 
 --------------------------------------------------------
 -- 1) Función reutilizable: devuelve array con los nombres
