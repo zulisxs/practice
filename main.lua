@@ -9,4 +9,4 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/zulisxs/practice/refs
 -- 3) Lógicas por pestaña
 loadstring(game:HttpGet("https://raw.githubusercontent.com/zulisxs/practice/refs/heads/main/autofarm.lua"))()
 
-loadstring(game:HttpGet("https://raw.githubusercontent.com/zulisxs/practice/main/autofarm_kill.lua"))()
+ 
