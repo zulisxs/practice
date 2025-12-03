@@ -62,10 +62,8 @@ local EnemiesDropdown = ElemSection:AddDropdown("EnemiesDropdown", {
     end
 })
 
-ElemSection:AddButton("RefreshBtn", {   -- <-- ID obligatorio
-    Title = "Refresh",
-    Description = "Refresh enemies",
-    Icon = "rotate-cw",
+ElemSection:AddButton({
+    Title = "Refresh", Description = "Refresh enemies", Icon = "rotate-cw",
     Callback = function()
         print("Refresh clicked")
     end
