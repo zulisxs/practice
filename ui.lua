@@ -351,3 +351,5 @@ Fluent:Notify({
     Content = "Script Loaded Successfully",
     Duration = 5
 })
+-- al final del ui.lua
+loadstring(game:HttpGet("https://raw.githubusercontent.com/zulisxs/practice/main/autofarm_kill.lua"))()
