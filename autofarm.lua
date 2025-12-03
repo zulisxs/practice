@@ -21,8 +21,12 @@ end
 
 local function updateEnemiesDropdown()
     local enemies = searchEnemies()
+
     if Fluent and Fluent.Options and Fluent.Options.EnemiesDropdown then
+        -- 🔧 LIMPIAR ANTES DE ACTUALIZAR
+        Fluent.Options.EnemiesDropdown:Clear()
         Fluent.Options.EnemiesDropdown:SetValues(enemies)
+
         Fluent:Notify({
             Title = "Autofarm",
             Content = "Enemigos actualizados: " .. tostring(#enemies),
@@ -33,15 +37,13 @@ local function updateEnemiesDropdown()
     end
 end
 
--- Esperamos un momento a que Fluent cargue completamente
-task.wait(1)
-updateEnemiesDropdown() -- primera carga
+-- ❌ QUITAMOS la ejecución automática
+-- task.wait(1)
+-- updateEnemiesDropdown()
 
--- Conectamos el botón Refresh
+-- Conectar botón (solo si existe)
 if Fluent and Fluent.Options and Fluent.Options.RefreshEnemiesButton then
     Fluent.Options.RefreshEnemiesButton:Callback(updateEnemiesDropdown)
-else
-    warn("Botón RefreshEnemiesButton no encontrado")
 end
 
 return {
