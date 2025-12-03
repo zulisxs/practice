@@ -83,7 +83,17 @@ local AutofarmToggle = ElemSection:AddToggle("AutofarmToggle", {
         print("Autofarm changed:", Value)
     end
 })
-
+local TeleportdelaySecondsInput = ElemSection:AddInput("TeleportdelaySecondsInput", {
+    Title = "Teleport delay (Seconds)", Description = "Type here",
+    Default = "",
+    Placeholder = "Enter seconds...",
+    Numeric = true,
+    Finished = true,
+    MaxLength = 50, Icon = "type",
+    Callback = function(Value)
+        print("Teleport delay (Seconds) changed:", Value)
+    end
+})
 -- Bosses Tab
 
 local ElemSection = Tabs.Bosses:AddSection("")
@@ -172,7 +182,7 @@ local AutoleaveInput = TrialsSection:AddInput("AutoleaveInput", {
     Title = "Auto leave", Description = "Leave in wave",
     Default = "",
     Placeholder = "Enter wave...",
-    Numeric = false,
+    Numeric = true,
     Finished = false,
     MaxLength = 50, Icon = "type",
     Callback = function(Value)
@@ -202,7 +212,7 @@ local AutoleaveInput = RaidsSection:AddInput("AutoleaveInput", {
     Title = "Auto leave", Description = "Leave in wave",
     Default = "",
     Placeholder = "Enter wave...",
-    Numeric = false,
+    Numeric = true,
     Finished = false,
     MaxLength = 50, Icon = "type",
     Callback = function(Value)
