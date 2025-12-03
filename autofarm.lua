@@ -1,15 +1,17 @@
 -- autofarm.lua
 local function searchEnemies()
     local enemiesFolder = game:GetService("Workspace"):FindFirstChild("Client") and game:GetService("Workspace").Client:FindFirstChild("Enemies")
-    local enemyList = {}
+local enemySet = {}
+local enemyList = {}
 
-    if enemiesFolder then
-        for _, enemyModel in ipairs(enemiesFolder:GetChildren()) do
-            if enemyModel:IsA("Model") and enemyModel.Name ~= "" then
-                table.insert(enemyList, enemyModel.Name)
-            end
+if enemiesFolder then
+    for _, enemyModel in ipairs(enemiesFolder:GetChildren()) do
+        if enemyModel:IsA("Model") and enemyModel.Name ~= "" and not enemySet[enemyModel.Name] then
+            enemySet[enemyModel.Name] = true
+            table.insert(enemyList, enemyModel.Name)
         end
-    else
+    end
+end
         warn("[searchEnemies] No se encontró 'Workspace.Client.Enemies'")
     end
 
