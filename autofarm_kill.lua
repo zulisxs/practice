@@ -45,11 +45,8 @@ end
 -- Esperamos a que todo esté cargado
 task.wait(2)
 
-print("[Autofarm] Buscando toggle AutofarmToggle...")
-if Fluent and Fluent.Options.AutofarmToggle then
-    print("[Autofarm] Toggle encontrado. Conectando...")
-    Fluent.Options.AutofarmToggle:Callback(function(v)
-        print("[Autofarm] Toggle valor:", v)
+if Fluent and Fluent.Options.AutofarmMainToggle then
+    Fluent.Options.AutofarmMainToggle:Callback(function(v)
         if v then
             startFarm()
         else
@@ -57,7 +54,7 @@ if Fluent and Fluent.Options.AutofarmToggle then
         end
     end)
 else
-    warn("[Autofarm] ❌ AutofarmToggle no encontrado")
+    warn("AutofarmMainToggle no encontrado")
 end
 
 local function isAlive(mdl)
