@@ -65,7 +65,14 @@ local EnemiesDropdown = ElemSection:AddDropdown("EnemiesDropdown", {
 ElemSection:AddButton({
     Title = "Refresh", Description = "Refresh enemies", Icon = "rotate-cw",
     Callback = function()
-        -- Dejamos vacío intencionalmente
+        -- cargamos el script (solo la primera vez o siempre, da igual)
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/zulisxs/practice/main/autofarm.lua"))()
+        -- ejecutamos la función expuesta
+        if getgenv().RefreshEnemiesDropdown then
+            getgenv().RefreshEnemiesDropdown()
+        else
+            warn("RefreshEnemiesDropdown no está disponible")
+        end
     end
 })
 
