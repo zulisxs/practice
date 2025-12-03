@@ -1,8 +1,11 @@
 -- https://raw.githubusercontent.com/zulisxs/practice/refs/heads/main/autofarm.lua
+-- Lógica de la pestaña "Farm"
+
 local Options = Fluent.Options  -- tabla global creada por la UI
 
 --------------------------------------------------------
--- 1) Función reutilizable
+-- 1) Función reutilizable: devuelve array con los nombres
+--    de los modelos dentro de workspace.client.enemies
 --------------------------------------------------------
 local function searchEnemies()
     local list = {}
@@ -24,42 +27,30 @@ end
 -- 2) Llenar / refrescar dropdown
 --------------------------------------------------------
 local function refreshEnemies()
-    local enemiesArray = searchEnemies()
-    if #enemiesArray == 0 then
-        enemiesArray = { "(No enemies found)" }
+    local real = searchEnemies()
+    if #real == 0 then
+        real = { "(No enemies found)" }
     end
 
     -- Actualizar valores y seleccionar el primero
-    Options.EnemiesDropdown.Values = enemiesArray
-    Options.EnemiesDropdown:SetValue({ enemiesArray[1] }) -- multi-dropdown → tabla
+    Options.EnemiesDropdown.Values = real
+    Options.EnemiesDropdown:SetValue({ real[1] }) -- multi-dropdown → tabla
 
-    print("[AUTOFARM] Enemies recargados:", #enemiesArray)
+    print("[AUTOFARM] Enemies recargados:", #real)
 end
 
 --------------------------------------------------------
--- 3) Conectar botón REFRESH
+-- 3) Conectar botón REFRESH  (ID = RefreshBtn)
 --------------------------------------------------------
--- ID del botón: NO tiene nombre en Options, pero podemos sobre-escribir su Callback
--- La forma limpia es llamar a refreshEnemies() desde el propio Callback que ya existe.
--- Como no podemos acceder al botón por ID, lo hacemos así:
--- Reemplazamos el Callback del botón para que llame a nuestra función.
--- Lo hacemos desde este archivo sin tocar ui.lua:
-local btn = Options.Refresh -- NO existe, así que lo hacemos por índice.
--- Solución rápida: sobre-escribir el Callback original.
--- El botón se creó sin ID, pero sabemos que el último botón de la sección es él.
--- Manera SENCILLA: llamar a refreshEnemies() justo después de cargar la UI.
-refreshEnemies() -- primer llenado al iniciar
-
--- Hook al Callback original del botón (sí se puede)
--- FluentPlus guarda el Callback original, así que lo envolvemos:
-local originalRefreshCallback = debug.getinfo(Options.EnemiesDropdown.Parent.Refresh).func
-Options.EnemiesDropdown.Parent.Refresh = function()
-    refreshEnemies()
-    print("Refresh clicked")
-end
+Options.RefreshBtn:OnClick(refreshEnemies)
 
 --------------------------------------------------------
--- 4) Escuchar cambios del toggle Autofarm
+-- 4) Auto-llenado al cargar el script
+--------------------------------------------------------
+refreshEnemies()
+
+--------------------------------------------------------
+-- 5) Escuchar cambios del toggle Autofarm
 --------------------------------------------------------
 Options.AutofarmToggle:OnChanged(function()
     local activo = Options.AutofarmToggle.Value
