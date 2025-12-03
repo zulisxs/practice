@@ -18,8 +18,10 @@ end
 local function updateEnemiesDropdown()
     local enemies = searchEnemies()
     if Fluent and Fluent.Options and Fluent.Options.EnemiesDropdown then
-        Fluent.Options.EnemiesDropdown:Clear()
-        Fluent.Options.EnemiesDropdown:SetValues(enemies)
+-- limpiar sobrescribiendo con tabla vacía
+Fluent.Options.EnemiesDropdown:SetValues({})
+-- cargar nuevos valores
+Fluent.Options.EnemiesDropdown:SetValues(enemies)
         Fluent:Notify({
             Title   = "Autofarm",
             Content = "Enemigos actualizados: " .. tostring(#enemies),
