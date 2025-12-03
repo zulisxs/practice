@@ -1,4 +1,4 @@
---  autofarm_kill.lua (VERSIÓN CORREGIDA)
+--  autofarm_kill.lua (VERSIÓN FINAL CORREGIDA)
 --  Cargar con loadstring(game:HttpGet("URL"))
 
 local Players = game:GetService("Players")
@@ -64,7 +64,6 @@ end
 
 --------------------------------------------------
 -- 4.  Función de Kill (CORREGIDA)
---     Mantiene posición hasta que el enemigo muera
 --------------------------------------------------
 local function killEnemy(enemy, farming)
 	local root = enemy:FindFirstChild("HumanoidRootPart") or enemy:FindFirstChild("Torso") or enemy:FindFirstChild("Head")
@@ -76,14 +75,14 @@ local function killEnemy(enemy, farming)
 	local hrp = char:FindFirstChild("HumanoidRootPart")
 	if not hrp then return end
 
-	-- Calcular posición segura (igual que el script original)
+	-- Calcular posición segura
 	local humanoid = char:FindFirstChildOfClass("Humanoid")
 	local hrpToFeet = (hrp.Size.Y / 2) + (humanoid.HipHeight or 2)
 	local safeHeight = -2
 	
 	-- LOOP: Mantener posición hasta que muera
 	while farming.active and isAlive(enemy) do
-		-- Recalcular posición en cada frame (por si el enemigo se mueve)
+		-- Recalcular posición en cada frame
 		root = enemy:FindFirstChild("HumanoidRootPart") or enemy:FindFirstChild("Torso") or enemy:FindFirstChild("Head")
 		if not root then break end
 		
@@ -93,12 +92,90 @@ local function killEnemy(enemy, farming)
 		-- ✅ TELEPORTARSE CONSTANTEMENTE
 		hrp.CFrame = CFrame.new(targetPosition)
 		
-		task.wait(0.1)  -- Más frecuente para mejor seguimiento
+		task.wait(0.1)
 	end
 end
 
 --------------------------------------------------
--- 5.  Loop de farmeo (CORREGIDO)
+-- 5.  Obtener enemigos seleccionados (CORREGIDO)
+--------------------------------------------------
+local function getSelectedEnemies()
+	local selectedNames = {}
+	
+	-- Verificar que Fluent y el dropdown existen
+	if not Fluent then
+		warn("❌ Fluent no está cargado")
+		return nil
+	end
+	
+	if not Fluent.Options then
+		warn("❌ Fluent.Options no existe")
+		return nil
+	end
+	
+	if not Fluent.Options.EnemiesDropdown then
+		warn("❌ Fluent.Options.EnemiesDropdown no existe")
+		return nil
+	end
+	
+	local raw = Fluent.Options.EnemiesDropdown.Value
+	
+	-- Debug: Mostrar qué recibimos
+	print("[DEBUG] Tipo de Value:", type(raw))
+	
+	if raw == nil then
+		warn("❌ Dropdown.Value es nil")
+		return nil
+	end
+	
+	-- Procesar según el tipo
+	if type(raw) == "table" then
+		-- CASO 1: Diccionario {["Goblin"] = true, ["Orc"] = true}
+		-- Este es el formato más común con Multi = true
+		local hasKeys = false
+		for k, v in pairs(raw) do
+			hasKeys = true
+			if type(k) == "string" and v == true then
+				selectedNames[k] = true
+				print("[DEBUG] Añadido (diccionario):", k)
+			end
+		end
+		
+		-- CASO 2: Array {"Goblin", "Orc"}
+		-- Por si acaso usa este formato
+		if not hasKeys and #raw > 0 then
+			for _, name in ipairs(raw) do
+				if type(name) == "string" then
+					selectedNames[name] = true
+					print("[DEBUG] Añadido (array):", name)
+				end
+			end
+		end
+	elseif type(raw) == "string" then
+		-- CASO 3: String simple (Multi = false)
+		if raw ~= "" then
+			selectedNames[raw] = true
+			print("[DEBUG] Añadido (string):", raw)
+		end
+	end
+	
+	-- Verificar si encontramos algo
+	local count = 0
+	for _ in pairs(selectedNames) do
+		count = count + 1
+	end
+	
+	print("[DEBUG] Total de enemigos seleccionados:", count)
+	
+	if count == 0 then
+		return nil
+	end
+	
+	return selectedNames
+end
+
+--------------------------------------------------
+-- 6.  Loop de farmeo (CORREGIDO)
 --------------------------------------------------
 local farmingState = { active = false }
 
@@ -110,19 +187,13 @@ local function startFarm()
 	local delaySec = 0
 	if Fluent and Fluent.Options.TeleportdelaySecondsInput then
 		delaySec = tonumber(Fluent.Options.TeleportdelaySecondsInput.Value) or 0
-		delaySec = math.max(delaySec, 0.1)  -- Mínimo 0.1s
+		delaySec = math.max(delaySec, 0.1)
 	end
 
-	-- Obtener enemigos seleccionados
-	local selectedNames = {}
-	if Fluent and Fluent.Options.EnemiesDropdown then
-		local raw = Fluent.Options.EnemiesDropdown.Value or {}
-		for _, name in pairs(raw) do 
-			selectedNames[name] = true 
-		end
-	end
+	-- ✅ OBTENER ENEMIGOS SELECCIONADOS (NUEVA FUNCIÓN)
+	local selectedNames = getSelectedEnemies()
 	
-	if not next(selectedNames) then
+	if not selectedNames then
 		Fluent:Notify({
 			Title = "Autofarm", 
 			Content = "No hay enemigos seleccionados", 
@@ -132,13 +203,19 @@ local function startFarm()
 		return
 	end
 
+	-- Mostrar enemigos objetivo
+	local enemyList = {}
+	for name, _ in pairs(selectedNames) do
+		table.insert(enemyList, name)
+	end
+	
+	print("[Autofarm] Enemigos objetivo:", table.concat(enemyList, ", "))
+	
 	Fluent:Notify({
 		Title = "Autofarm", 
-		Content = "Iniciando farm...", 
+		Content = "Iniciando farm de " .. #enemyList .. " enemigos", 
 		Duration = 3
 	})
-
-	print("[Autofarm] Enemigos objetivo:", table.concat(selectedNames, ", "))
 
 	-- LOOP PRINCIPAL
 	while farmingState.active do
@@ -147,7 +224,7 @@ local function startFarm()
 		if target then
 			print("[Autofarm] Atacando:", target.Name)
 			
-			-- ✅ FUNCIÓN CORREGIDA: Mantiene posición
+			-- ✅ Mantiene posición
 			killEnemy(target, farmingState)
 			
 			-- Delay entre kills
@@ -168,11 +245,11 @@ local function stopFarm()
 		Content = "Farm detenido", 
 		Duration = 3
 	})
-	print("[Autofarm] Farm detenido por el usuario")
+	print("[Autofarm] Farm detenido")
 end
 
 --------------------------------------------------
--- 6.  Monitoreo del toggle
+-- 7.  Monitoreo del toggle
 --------------------------------------------------
 task.wait(2)
 task.spawn(function()
@@ -190,10 +267,11 @@ task.spawn(function()
 end)
 
 --------------------------------------------------
--- 7.  Export
+-- 8.  Export
 --------------------------------------------------
 return { 
 	searchEnemies = searchEnemies,
 	startFarm = startFarm,
-	stopFarm = stopFarm
+	stopFarm = stopFarm,
+	getSelectedEnemies = getSelectedEnemies
 }
