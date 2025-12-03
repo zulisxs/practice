@@ -78,10 +78,7 @@ ElemSection:AddButton({
 
 local AutofarmMainToggle = ElemSection:AddToggle("AutofarmMainToggle", {
     Title = "Autofarm", Description = "Activate Auto Farm",
-    Default = false, Icon = "toggle-right",
-    Callback = function(Value)
-        print("🔧 UI Toggle AutofarmMainToggle valor:", Value)
-    end
+    Default = false, Icon = "toggle-right"
 })
 local TeleportdelaySecondsInput = ElemSection:AddInput("TeleportdelaySecondsInput", {
     Title = "Teleport delay (Seconds)", Description = "Type here",
