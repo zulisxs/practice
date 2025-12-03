@@ -76,11 +76,11 @@ ElemSection:AddButton({
     end
 })
 
-local AutofarmToggle = ElemSection:AddToggle("AutofarmMainToggle", {
+local AutofarmMainToggle = ElemSection:AddToggle("AutofarmMainToggle", {
     Title = "Autofarm", Description = "Activate Auto Farm",
     Default = false, Icon = "toggle-right",
     Callback = function(Value)
-        print("Autofarm changed:", Value)
+        print("🔧 UI Toggle AutofarmMainToggle valor:", Value)
     end
 })
 local TeleportdelaySecondsInput = ElemSection:AddInput("TeleportdelaySecondsInput", {
@@ -351,5 +351,6 @@ Fluent:Notify({
     Content = "Script Loaded Successfully",
     Duration = 5
 })
--- al final del ui.lua
+-- última línea del ui.lua
+print("🧪 Cargando autofarm_kill.lua...")
 loadstring(game:HttpGet("https://raw.githubusercontent.com/zulisxs/practice/main/autofarm_kill.lua"))()
