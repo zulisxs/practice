@@ -22,43 +22,28 @@ local function searchEnemies()
 end
 
 --------------------------------------------------
--- 2.  Obtener enemigo más cercano de los seleccionados
---     IMPRESIÓN COMPLETA DE FILTROS
+-- 2.  Obtener enemigo más cercano
+--     silent = true  →  no imprime
 --------------------------------------------------
-local function getClosestEnemy(selectedNames)
+local function getClosestEnemy(selectedNames, silent)
 	local enemiesFolder = workspace:FindFirstChild("Client") and workspace.Client:FindFirstChild("Enemies")
-	if not enemiesFolder then
-		warn("[Autofarm] Carpeta Enemies no existe")
-		return nil
-	end
-
-	-- LISTADO COMPLETO DE LO QUE HAY
-	for _, mdl in ipairs(enemiesFolder:GetChildren()) do
-		print("[Autofarm] Modelo encontrado:", mdl.Name, "| Clase:", mdl.ClassName)
-	end
+	if not enemiesFolder then return nil end
 
 	local closest, dist = nil, math.huge
 	for _, mdl in ipairs(enemiesFolder:GetChildren()) do
-		print("----------------------------------")
-		print("[Autofarm] Revisando modelo:", mdl.Name)
-		print("[Autofarm] ¿Es Model?", mdl:IsA("Model"))
-		print("[Autofarm] ¿Está en selected?", selectedNames[mdl.Name])
-
-		local hum  = mdl:FindFirstChildOfClass("Humanoid")
-		local root = mdl:FindFirstChild("HumanoidRootPart") or mdl:FindFirstChild("Torso") or mdl:FindFirstChild("Head")
-
-		print("[Autofarm] ¿Tiene Humanoid?", hum ~= nil)
-		if hum then print("[Autofarm] Humanoid.Health:", hum.Health) end
-		print("[Autofarm] ¿Tiene RootPart/Torso/Head?", root ~= nil)
-
-		if mdl:IsA("Model") and selectedNames[mdl.Name] and hum and hum.Health > 0 and root then
-			local d = (root.Position - lp.Character:WaitForChild("HumanoidRootPart").Position).Magnitude
-			if d < dist then
-				dist, closest = d, mdl
+		if mdl:IsA("Model") and selectedNames[mdl.Name] then
+			local hum  = mdl:FindFirstChildOfClass("Humanoid")
+			local root = mdl:FindFirstChild("HumanoidRootPart") or mdl:FindFirstChild("Torso") or mdl:FindFirstChild("Head")
+			if hum and hum.Health > 0 and root then
+				local d = (root.Position - lp.Character:WaitForChild("HumanoidRootPart").Position).Magnitude
+				if d < dist then dist, closest = d, mdl end
 			end
 		end
 	end
-	print("[Autofarm] Enemigo más cercano:", closest and closest.Name or "ninguno")
+
+	if not silent then
+		print("[Autofarm] Enemigo más cercano:", closest and closest.Name or "ninguno")
+	end
 	return closest
 end
 
@@ -99,15 +84,8 @@ local function startFarm()
 	local selectedNames = {}
 	if Fluent and Fluent.Options.EnemiesDropdown then
 		local raw = Fluent.Options.EnemiesDropdown.Value or {}
-		print("[Autofarm] Dropdown raw:", raw)
 		for _, name in pairs(raw) do selectedNames[name] = true end
 	end
-	print("[Autofarm] Nombres en el SET:", selectedNames)
-	-- Ejemplo para el primer modelo que veas
-	for name in pairs(selectedNames) do
-		print("[Autofarm] ¿", name, "está en el SET? SÍ"); break
-	end
-
 	if not next(selectedNames) then
 		Fluent:Notify({Title = "Autofarm", Content = "No hay enemigos seleccionados", Duration = 3})
 		farming = false; return
@@ -115,8 +93,9 @@ local function startFarm()
 
 	Fluent:Notify({Title = "Autofarm", Content = "Iniciando farm...", Duration = 3})
 
+	local first = true           -- solo imprime la 1ª vuelta
 	while farming do
-		local target = getClosestEnemy(selectedNames)
+		local target = getClosestEnemy(selectedNames, first)   -- silent = first
 		if target then
 			teleportTo(target)
 			while farming and target.Parent and isAlive(target) do task.wait(0.5) end
@@ -124,6 +103,7 @@ local function startFarm()
 		else
 			task.wait(1)
 		end
+		first = false
 	end
 end
 
@@ -136,7 +116,6 @@ end
 -- 6.  Monitoreo del toggle
 --------------------------------------------------
 task.wait(2)
-print("[Autofarm] Monitoreando AutofarmMainToggle...")
 task.spawn(function()
 	while true do
 		task.wait(0.5)
