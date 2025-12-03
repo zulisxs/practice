@@ -20,7 +20,10 @@ end
 
 local function getClosestEnemy(selectedNames)
     local enemiesFolder = workspace:FindFirstChild("Client") and workspace.Client:FindFirstChild("Enemies")
-    if not enemiesFolder then return nil end
+    if not enemiesFolder then
+        warn("[Autofarm] Carpeta Enemies no encontrada")
+        return nil
+    end
     local closest = nil
     local dist = math.huge
     for _, mdl in ipairs(enemiesFolder:GetChildren()) do
@@ -36,7 +39,25 @@ local function getClosestEnemy(selectedNames)
             end
         end
     end
+    print("[Autofarm] Enemigo más cercano:", closest and closest.Name or "ninguno")
     return closest
+end
+-- Esperamos a que todo esté cargado
+task.wait(2)
+
+print("[Autofarm] Buscando toggle AutofarmToggle...")
+if Fluent and Fluent.Options.AutofarmToggle then
+    print("[Autofarm] Toggle encontrado. Conectando...")
+    Fluent.Options.AutofarmToggle:Callback(function(v)
+        print("[Autofarm] Toggle valor:", v)
+        if v then
+            startFarm()
+        else
+            stopFarm()
+        end
+    end)
+else
+    warn("[Autofarm] ❌ AutofarmToggle no encontrado")
 end
 
 local function isAlive(mdl)
@@ -65,10 +86,11 @@ local function startFarm()
     end
 
     -- leemos nombres seleccionados (dropdown Multi)
+    -- leemos nombres seleccionados
     local selected = {}
     if Fluent and Fluent.Options.EnemiesDropdown then
         local raw = Fluent.Options.EnemiesDropdown.Value or {}
-        -- convierte diccionario a set plano
+        print("[Autofarm] Dropdown raw value:", raw)
         for _, name in pairs(raw) do
             selected[name] = true
         end
@@ -78,6 +100,7 @@ local function startFarm()
         farming = false
         return
     end
+    print("[Autofarm] Enemigos seleccionados:", selected)
 
     Fluent:Notify({Title = "Autofarm", Content = "Iniciando farm...", Duration = 3})
 
