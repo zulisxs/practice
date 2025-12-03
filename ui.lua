@@ -1,160 +1,336 @@
--- UI SOLO (sin lógica). Asegúrate de tener cargado Fluent antes.
--- No llames CreateWindow más de una vez.
 local Fluent, SaveManager, InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/discoart/FluentPlus/refs/heads/main/Beta.lua"))()
 
--- Ventana principal
 local Window = Fluent:CreateWindow({
-    Title = "My Script UI",
-    SubTitle = "Solo UI (sin lógica aún)",
+    Title = "zUlisxs HUB",
+    SubTitle = "",
     TitleIcon = "home",
-    Size = UDim2.fromOffset(700, 550),
     TabWidth = 180,
+    Size = UDim2.fromOffset(700, 550),
     Acrylic = true,
     Theme = "Dark",
     Search = true,
     MinimizeKey = Enum.KeyCode.LeftControl,
-    UserInfo = false
+    UserInfo = true,
+    UserInfoTitle = game.Players.LocalPlayer.Name,
+    UserInfoSubtitle = "Premium User",
+    UserInfoSubtitleColor = Color3.fromRGB(255, 215, 0),
+    UserInfoTop = false,
 })
 
--- Pestañas
+
 local Tabs = {
-    About = Window:AddTab({ Title = "About", Icon = "info" }),
-    Farm = Window:AddTab({ Title = "Farm", Icon = "picker" }),
-    Bosses = Window:AddTab({ Title = "Bosses", Icon = "swords" }),
-    GameMode = Window:AddTab({ Title = "Game mode", Icon = "gamepad-2" })
+    Main = Window:AddTab({ Title = "Main", Icon = "home" }),
+    Farm = Window:AddTab({ Title = "Farm", Icon = "swords" }),
+    Bosses = Window:AddTab({ Title = "Bosses", Icon = "skull" }),
+    GameMode = Window:AddTab({ Title = "Game Mode", Icon = "puzzle" }),
+    Teleport = Window:AddTab({ Title = "Teleport", Icon = "map-pin" }),
+    Others = Window:AddTab({ Title = "Others", Icon = "home" }),
+    Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
 }
 
--- Opciones centralizadas (para usar luego)
 local Options = Fluent.Options
 
--- ========== TAB: ABOUT ==========
-local AboutSection = Tabs.About:AddSection("About / Info")
-local AboutParagraph = AboutSection:AddParagraph({
-    Title = "Información del script",
-    Content = "Aquí mostrarás la info del script, cambios y arreglos.\n(Edita este texto luego).",
-    Icon = "info",
-    Visible = true
+-- Main Tab
+
+local InfoSection = Tabs.Main:AddSection("Info", "info")
+
+InfoSection:AddParagraph({
+    Title = "Priority",
+    Content = "1- Raids (Only in auto join)\n2- Trials\n2- Raids (in auto open)\n3- Bosses\n", Icon = "info"
 })
 
--- ========== TAB: FARM ==========
-local FarmSection = Tabs.Farm:AddSection("Farm Controls")
-
--- Dropdown del menú (placeholder de opciones)
-local FarmMenu = FarmSection:AddDropdown("FarmMenu", {
-    Title = "Farm Menu",
-    Description = "Selecciona una opción (placeholder).",
-    Values = { "Option 1", "Option 2", "Option 3" },
-    Default = "Option 1",
-    Multi = false,
-    Search = true,
-    KeepSearch = false,
-    Icon = "list",
-    Visible = true,
-    Callback = function(Value)
-        print("FarmMenu seleccionado:", Value)
-    end
-})
-
--- Botón para recargar el menú
-local FarmReloadButton = FarmSection:AddButton({
-    Title = "Recargar menú",
-    Description = "Vuelve a cargar las opciones del menú.",
-    Icon = "refresh-ccw",
-    Visible = true,
+InfoSection:AddButton({
+    Title = "Discord", Description = "Join discord for add suggestion, bugs and notify of updates", Icon = "external-link",
     Callback = function()
-        print("Recargando menú Farm...")
-        -- Aquí luego actualizas FarmMenu:SetValue(...) o su lista de Values
+        print("Discord clicked")
     end
 })
 
--- Switch activar/desactivar función de Farm
-local FarmToggle = FarmSection:AddToggle("FarmToggle", {
-    Title = "Activar Farm",
-    Description = "Activa o desactiva la función de farm.",
-    Default = false,
-    Icon = "toggle-right",
-    Visible = true,
+-- Farm Tab
+
+local ElemSection = Tabs.Farm:AddSection("")
+
+local EnemiesDropdown = ElemSection:AddDropdown("EnemiesDropdown", {
+    Title = "Enemies", Description = "Select enemies",
+    Values = { "" },
+    Default = {},
+    Multi = true,
+    Search = true,
+    AllowNull = false, Icon = "list",
     Callback = function(Value)
-        print("Farm activado:", Value)
+        print("Enemies changed:", Value)
     end
 })
 
--- ========== TAB: BOSSES ==========
-local BossSection = Tabs.Bosses:AddSection("Bosses (8 toggles)")
+ElemSection:AddButton({
+    Title = "Refresh", Description = "Refresh enemies", Icon = "rotate-cw",
+    Callback = function()
+        print("Refresh clicked")
+    end
+})
 
--- 8 toggles: Boss 1 ... Boss 8
-for i = 1, 8 do
-    BossSection:AddToggle(("Boss%02dToggle"):format(i), {
-        Title = ("Boss %d"):format(i),
-        Description = "Activar/Desactivar objetivo",
-        Default = false,
-        Icon = "skull",
-        Visible = true,
-        Callback = function(Value)
-            print(("Boss %d -> %s"):format(i, tostring(Value)))
-        end
-    })
-end
+local AutofarmToggle = ElemSection:AddToggle("AutofarmToggle", {
+    Title = "Autofarm", Description = "Activate Auto Farm",
+    Default = false, Icon = "toggle-right",
+    Callback = function(Value)
+        print("Autofarm changed:", Value)
+    end
+})
 
--- ========== TAB: GAME MODE ==========
-local GMSection = Tabs.GameMode:AddSection("Game Mode Settings")
+-- Bosses Tab
 
--- Menú de modos (por ahora solo 'Trial Easy')
-local GameModeDropdown = GMSection:AddDropdown("GameMode", {
-    Title = "Game Mode",
-    Description = "Selecciona el modo de juego",
+local ElemSection = Tabs.Bosses:AddSection("")
+
+local XYZMetropolisSeaKingToggle = ElemSection:AddToggle("XYZMetropolisSeaKingToggle", {
+    Title = "XYZ Metropolis Sea King",
+    Default = false, Icon = "toggle-right",
+    Callback = function(Value)
+        print("XYZ Metropolis Sea King changed:", Value)
+    end
+})
+
+local XYZMetropolisCosmicGaroToggle = ElemSection:AddToggle("XYZMetropolisCosmicGaroToggle", {
+    Title = "XYZ Metropolis Cosmic Garo",
+    Default = false, Icon = "toggle-right",
+    Callback = function(Value)
+        print("XYZ Metropolis Cosmic Garo changed:", Value)
+    end
+})
+
+local NinjaVillageItachuToggle = ElemSection:AddToggle("NinjaVillageItachuToggle", {
+    Title = "Ninja Village Itachu",
+    Default = false, Icon = "toggle-right",
+    Callback = function(Value)
+        print("Ninja Village Itachu changed:", Value)
+    end
+})
+
+local NinjaVillageNankoToggle = ElemSection:AddToggle("NinjaVillageNankoToggle", {
+    Title = "Ninja Village Nanko",
+    Default = false, Icon = "toggle-right",
+    Callback = function(Value)
+        print("Ninja Village Nanko changed:", Value)
+    end
+})
+
+local ForgottenShoreLuciuToggle = ElemSection:AddToggle("ForgottenShoreLuciuToggle", {
+    Title = "Forgotten Shore Luciu",
+    Default = false, Icon = "toggle-right",
+    Callback = function(Value)
+        print("Forgotten Shore Luciu changed:", Value)
+    end
+})
+
+local ForgottenShoreHawkeyeToggle = ElemSection:AddToggle("ForgottenShoreHawkeyeToggle", {
+    Title = "Forgotten Shore Hawkeye",
+    Default = false, Icon = "toggle-right",
+    Callback = function(Value)
+        print("Forgotten Shore Hawkeye changed:", Value)
+    end
+})
+
+local SlayerForestHantengoToggle = ElemSection:AddToggle("SlayerForestHantengoToggle", {
+    Title = "Slayer Forest Hantengo",
+    Default = false, Icon = "toggle-right",
+    Callback = function(Value)
+        print("Slayer Forest Hantengo changed:", Value)
+    end
+})
+
+local SlayerForestKokushibeToggle = ElemSection:AddToggle("SlayerForestKokushibeToggle", {
+    Title = "Slayer Forest Kokushibe",
+    Default = false, Icon = "toggle-right",
+    Callback = function(Value)
+        print("Slayer Forest Kokushibe changed:", Value)
+    end
+})
+
+-- Game Mode Tab
+
+local TrialsSection = Tabs.GameMode:AddSection("Trials")
+
+local SelectTrialDropdown = TrialsSection:AddDropdown("SelectTrialDropdown", {
+    Title = "Select Trial",
     Values = { "Trial Easy" },
-    Default = "Trial Easy",
+    Default = {},
+    Multi = true,
+    Search = true,
+    AllowNull = false, Icon = "list",
+    Callback = function(Value)
+        print("Select Trial changed:", Value)
+    end
+})
+
+local AutoleaveInput = TrialsSection:AddInput("AutoleaveInput", {
+    Title = "Auto leave", Description = "Leave in wave",
+    Default = "",
+    Placeholder = "Enter wave...",
+    Numeric = false,
+    Finished = false,
+    MaxLength = 50, Icon = "type",
+    Callback = function(Value)
+        print("Auto leave changed:", Value)
+    end
+})
+
+local AutoJoinToggle = TrialsSection:AddToggle("AutoJoinToggle", {
+    Title = "Auto Join ",
+    Default = false, Icon = "toggle-right",
+    Callback = function(Value)
+        print("Auto Join  changed:", Value)
+    end
+})
+
+local AutoFarmToggle = TrialsSection:AddToggle("AutoFarmToggle", {
+    Title = "Auto Farm", Description = "Auto farm npc in trial",
+    Default = false, Icon = "toggle-right",
+    Callback = function(Value)
+        print("Auto Farm changed:", Value)
+    end
+})
+
+local RaidsSection = Tabs.GameMode:AddSection("Raids")
+
+local AutoleaveInput = RaidsSection:AddInput("AutoleaveInput", {
+    Title = "Auto leave", Description = "Leave in wave",
+    Default = "",
+    Placeholder = "Enter wave...",
+    Numeric = false,
+    Finished = false,
+    MaxLength = 50, Icon = "type",
+    Callback = function(Value)
+        print("Auto leave changed:", Value)
+    end
+})
+
+local AutojoinToggle = RaidsSection:AddToggle("AutojoinToggle", {
+    Title = "Auto join", Description = "Only auto join when is open raid",
+    Default = false, Icon = "toggle-right",
+    Callback = function(Value)
+        print("Auto join changed:", Value)
+    end
+})
+
+local AutoOpenToggle = RaidsSection:AddToggle("AutoOpenToggle", {
+    Title = "Auto Open", Description = "Auto open + auto join raid",
+    Default = false, Icon = "toggle-right",
+    Callback = function(Value)
+        print("Auto Open changed:", Value)
+    end
+})
+
+local AutoFarmToggle = RaidsSection:AddToggle("AutoFarmToggle", {
+    Title = "Auto Farm", Description = "Auto farm npc in raid",
+    Default = false, Icon = "toggle-right",
+    Callback = function(Value)
+        print("Auto Farm changed:", Value)
+    end
+})
+
+-- Teleport Tab
+
+local ElemSection = Tabs.Teleport:AddSection("")
+
+ElemSection:AddParagraph({
+    Title = "Teleport after farm",
+    Content = "This is to get to the right place after farming trials, raids, bosses, etc.", Icon = "info"
+})
+
+local SelectmapDropdown = ElemSection:AddDropdown("SelectmapDropdown", {
+    Title = "Select map",
+    Values = { "XYZ Metropolis", "Ninja Village", "Forgotten Shore", "Slayer Forest" },
+    Default = "",
     Multi = false,
-    Search = false,
-    Icon = "flag",
-    Visible = true,
+    Search = true, Icon = "list",
     Callback = function(Value)
-        print("GameMode seleccionado:", Value)
+        print("Select map changed:", Value)
     end
 })
 
--- Switch: Activate
-local GMActivate = GMSection:AddToggle("GMActivate", {
-    Title = "Activate",
-    Description = "Activa el modo seleccionado",
-    Default = false,
-    Icon = "play",
-    Visible = true,
-    Callback = function(Value)
-        print("GameMode Activate:", Value)
+ElemSection:AddButton({
+    Title = "Save ubication", Icon = "pin",
+    Callback = function()
+        print("Save ubication clicked")
     end
 })
 
--- Switch: Autoleave
-local GMAutoleave = GMSection:AddToggle("GMAutoleave", {
-    Title = "Autoleave",
-    Description = "Salir automáticamente según la regla configurada",
-    Default = false,
-    Icon = "log-out",
-    Visible = true,
-    Callback = function(Value)
-        print("GameMode Autoleave:", Value)
+ElemSection:AddButton({
+    Title = "Tp in ubication", Icon = "map-pin",
+    Callback = function()
+        print("Tp in ubication clicked")
     end
 })
 
--- Campo numérico: Auto leave in room
-local GMAutoleaveRoom = GMSection:AddInput("GMAutoleaveRoom", {
-    Title = "Auto leave in room",
-    Description = "Ingresa el número de sala para autoleave",
-    Default = "0",
-    Placeholder = "0",
-    Numeric = true,
-    Finished = true,  -- dispara callback al presionar Enter
-    MaxLength = 5,
-    Icon = "hash",
-    Visible = true,
+local ActivateautotpToggle = ElemSection:AddToggle("ActivateautotpToggle", {
+    Title = "Activate auto tp",
+    Default = false, Icon = "toggle-right",
     Callback = function(Value)
-        local num = tonumber(Value)
-        print("Auto leave in room:", num)
+        print("Activate auto tp changed:", Value)
     end
 })
 
--- TIP: Puedes leer/ajustar valores desde Fluent.Options más adelante, por ejemplo:
--- print(Options.FarmToggle.Value)
--- Options.GMActivate:SetValue(true)
+-- Others Tab
+
+local AutoStarSection = Tabs.Others:AddSection("Auto Star", "star")
+
+local SelectmapDropdown = AutoStarSection:AddDropdown("SelectmapDropdown", {
+    Title = "Select map",
+    Values = { "XYZ Metropolis", "Ninja Village", "Forgotten Shore", "Slayer Forest" },
+    Default = "",
+    Multi = false,
+    Search = true, Icon = "list",
+    Callback = function(Value)
+        print("Select map changed:", Value)
+    end
+})
+
+local AutostarToggle = AutoStarSection:AddToggle("AutostarToggle", {
+    Title = "Auto star", Description = "You have to be close to the stars for this function",
+    Default = false, Icon = "toggle-right",
+    Callback = function(Value)
+        print("Auto star changed:", Value)
+    end
+})
+
+local AutoExpeditionSection = Tabs.Others:AddSection("Auto Expedition", "shield")
+
+local SelectmapDropdown = AutoExpeditionSection:AddDropdown("SelectmapDropdown", {
+    Title = "Select map",
+    Values = { "XYZ Metropolis", "Ninja Village", "Forgotten Shore", "Slayer Forest" },
+    Default = {},
+    Multi = true,
+    Search = true,
+    AllowNull = false, Icon = "list",
+    Callback = function(Value)
+        print("Select map changed:", Value)
+    end
+})
+
+local ActivateautoexpeditionToggle = AutoExpeditionSection:AddToggle("ActivateautoexpeditionToggle", {
+    Title = "Activate auto expedition", Description = "Auto claim + auto send expedition",
+    Default = false, Icon = "toggle-right",
+    Callback = function(Value)
+        print("Activate auto expedition changed:", Value)
+    end
+})
+
+-- SaveManager & InterfaceManager Configuration
+SaveManager:SetLibrary(Fluent)
+InterfaceManager:SetLibrary(Fluent)
+SaveManager:IgnoreThemeSettings()
+SaveManager:SetIgnoreIndexes({})
+InterfaceManager:SetFolder("FluentPlusSettings")
+SaveManager:SetFolder("FluentPlusSettings/Configs")
+
+InterfaceManager:BuildInterfaceSection(Tabs.Settings)
+SaveManager:BuildConfigSection(Tabs.Settings)
+
+Window:SelectTab(1)
+
+SaveManager:LoadAutoloadConfig()
+
+Fluent:Notify({
+    Title = "Fluent Plus",
+    Content = "Script Loaded Successfully",
+    Duration = 5
+})
