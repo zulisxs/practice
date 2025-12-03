@@ -1,11 +1,10 @@
 -- https://raw.githubusercontent.com/zulisxs/practice/refs/heads/main/autofarm.lua
--- Lógica de la pestaña "Farm"
+-- LÓGICA PESTAÑA "FARM"
 
-local Options = Fluent.Options  -- tabla global creada por la UI
+local Options = Fluent.Options   -- expuesto por la UI
 
 --------------------------------------------------------
--- 1) Función reutilizable: devuelve array con los nombres
---    de los modelos dentro de workspace.client.enemies
+-- 1)  Función reutilizable
 --------------------------------------------------------
 local function searchEnemies()
     local list = {}
@@ -24,33 +23,29 @@ local function searchEnemies()
 end
 
 --------------------------------------------------------
--- 2) Llenar / refrescar dropdown
+-- 2)  Llenar dropdown
 --------------------------------------------------------
 local function refreshEnemies()
-    local real = searchEnemies()
-    if #real == 0 then
-        real = { "(No enemies found)" }
-    end
+    local names = searchEnemies()
+    if #names == 0 then names = { "(No enemies found)" } end
 
-    -- Actualizar valores y seleccionar el primero
-    Options.EnemiesDropdown.Values = real
-    Options.EnemiesDropdown:SetValue({ real[1] }) -- multi-dropdown → tabla
-
-    print("[AUTOFARM] Enemies recargados:", #real)
+    Options.EnemiesDropdown.Values = names
+    Options.EnemiesDropdown:SetValue({ names[1] })   -- multi-dropdown → tabla
+    print("[AUTOFARM] Enemies recargados:", #names)
 end
 
 --------------------------------------------------------
--- 3) Conectar botón REFRESH  (ID = RefreshBtn)
+-- 3)  Conectar botón REFRESH
 --------------------------------------------------------
 Options.RefreshBtn:OnClick(refreshEnemies)
 
 --------------------------------------------------------
--- 4) Auto-llenado al cargar el script
+-- 4)  Auto-llenado al iniciar
 --------------------------------------------------------
 refreshEnemies()
 
 --------------------------------------------------------
--- 5) Escuchar cambios del toggle Autofarm
+-- 5)  Escuchar toggle de farm
 --------------------------------------------------------
 Options.AutofarmToggle:OnChanged(function()
     local activo = Options.AutofarmToggle.Value
