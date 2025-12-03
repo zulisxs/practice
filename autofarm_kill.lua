@@ -124,9 +124,13 @@ local function stopFarm()
     Fluent:Notify({Title = "Autofarm", Content = "Farm detenido", Duration = 3})
 end
 
-task.wait(1.5) -- un poco más de tiempo por si acaso
-if Fluent and Fluent.Options.AutofarmMainToggle then
+-- autofarm_kill.lua (final)
+task.wait(2)
+print("[Autofarm] Buscando AutofarmMainToggle...")
+if Fluent and Fluent.Options and Fluent.Options.AutofarmMainToggle then
+    print("[Autofarm] ✅ Toggle encontrado. Conectando...")
     Fluent.Options.AutofarmMainToggle:Callback(function(v)
+        print("[Autofarm] 🔥 Callback ejecutado. Valor:", v)
         if v then
             startFarm()
         else
@@ -134,9 +138,7 @@ if Fluent and Fluent.Options.AutofarmMainToggle then
         end
     end)
 else
-    warn("Toggle AutofarmToggle no encontrado")
+    warn("[Autofarm] ❌ AutofarmMainToggle no encontrado")
+    warn("[Autofarm] Fluent existe:", Fluent ~= nil)
+    warn("[Autofarm] Fluent.Options existe:", Fluent and Fluent.Options ~= nil)
 end
-
-return {
-    searchEnemies = searchEnemies
-}
