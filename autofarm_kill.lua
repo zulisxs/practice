@@ -124,21 +124,22 @@ local function stopFarm()
     Fluent:Notify({Title = "Autofarm", Content = "Farm detenido", Duration = 3})
 end
 
--- autofarm_kill.lua (final)
-task.wait(2)
-print("[Autofarm] Buscando AutofarmMainToggle...")
-if Fluent and Fluent.Options and Fluent.Options.AutofarmMainToggle then
-    print("[Autofarm] ✅ Toggle encontrado. Conectando...")
-    Fluent.Options.AutofarmMainToggle:Callback(function(v)
-        print("[Autofarm] 🔥 Callback ejecutado. Valor:", v)
-        if v then
-            startFarm()
-        else
-            stopFarm()
+-- autofarm_kill.lua
+local function monitorToggle()
+    while true do
+        task.wait(0.5)
+        if Fluent and Fluent.Options.AutofarmMainToggle then
+            local v = Fluent.Options.AutofarmMainToggle.Value
+            if v and not farming then
+                startFarm()
+            elseif not v and farming then
+                stopFarm()
+            end
         end
-    end)
-else
-    warn("[Autofarm] ❌ AutofarmMainToggle no encontrado")
-    warn("[Autofarm] Fluent existe:", Fluent ~= nil)
-    warn("[Autofarm] Fluent.Options existe:", Fluent and Fluent.Options ~= nil)
+    end
 end
+
+-- arrancamos el monitoreo
+task.wait(2)
+print("[Autofarm] Monitoreando AutofarmMainToggle...")
+monitorToggle()
