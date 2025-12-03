@@ -2,7 +2,7 @@
 -- Cargado desde raw.githubusercontent.com
 
 local function searchEnemies()
-    local enemiesFolder = game:GetService("Workspace"):FindFirstChild("client") and game:GetService("Workspace").client:FindFirstChild("enemies")
+    local enemiesFolder = game:GetService("Workspace"):FindFirstChild("Client") and game:GetService("Workspace").Client:FindFirstChild("Enemies")
     local enemyList = {}
 
     if enemiesFolder then
