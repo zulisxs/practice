@@ -125,8 +125,8 @@ local function stopFarm()
 end
 
 task.wait(1.5) -- un poco más de tiempo por si acaso
-if Fluent and Fluent.Options.AutofarmToggle then
-    Fluent.Options.AutofarmToggle:Callback(function(v)
+if Fluent and Fluent.Options.AutofarmMainToggle then
+    Fluent.Options.AutofarmMainToggle:Callback(function(v)
         if v then
             startFarm()
         else
